@@ -12,6 +12,7 @@
 		45FAF1F822CAFAA300DBA977 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 45FAF1F622CAFAA300DBA977 /* Main.storyboard */; };
 		45FAF1FA22CAFAA400DBA977 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45FAF1F922CAFAA400DBA977 /* Assets.xcassets */; };
 		45FAF1FD22CAFAA400DBA977 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 45FAF1FB22CAFAA400DBA977 /* LaunchScreen.storyboard */; };
+		45FAF20522CB00CF00DBA977 /* Mnist.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 45FAF20422CB00CF00DBA977 /* Mnist.mlmodel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		45FAF1F922CAFAA400DBA977 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		45FAF1FC22CAFAA400DBA977 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		45FAF1FE22CAFAA400DBA977 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		45FAF20422CB00CF00DBA977 /* Mnist.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Mnist.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 		45FAF1F122CAFAA300DBA977 /* QuakerScorer */ = {
 			isa = PBXGroup;
 			children = (
+				45FAF20422CB00CF00DBA977 /* Mnist.mlmodel */,
 				45FAF1F222CAFAA300DBA977 /* AppDelegate.swift */,
 				45FAF1F422CAFAA300DBA977 /* ViewController.swift */,
 				45FAF1F622CAFAA300DBA977 /* Main.storyboard */,
@@ -135,6 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				45FAF20522CB00CF00DBA977 /* Mnist.mlmodel in Sources */,
 				45FAF1F522CAFAA300DBA977 /* ViewController.swift in Sources */,
 				45FAF1F322CAFAA300DBA977 /* AppDelegate.swift in Sources */,
 			);

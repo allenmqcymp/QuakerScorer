@@ -57,6 +57,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
     
     func detectTextHandler(request: VNRequest, error: Error?) {
+        print("handler started")
         guard let observations = request.results else {
             print("no result")
             return
@@ -74,7 +75,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
                 if let boxes = region?.characterBoxes {
                     for characterBox in boxes {
                         self.highlightLetters(box: characterBox)
-                    }l
+                    }
                 }
             }
         }
@@ -86,6 +87,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        mainImageView.image = UIImage(named: "mnist.png")
+        startTextDetection()
     }
     
     override func viewWillAppear(_ animated: Bool) {

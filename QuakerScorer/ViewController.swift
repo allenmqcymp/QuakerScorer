@@ -36,7 +36,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     
     // creates a request that looks for text in rectangles
     func startTextDetection() {
-        let textRequest = VNDetectTextRectanglesRequest(completionHandler: self.detectTextHandler)
+        print("starting text detection")
+//        let textRequest = VNDetectTextRectanglesRequest(completionHandler: self.detectTextHandler)
+        let textRequest = VNDetectTextRectanglesRequest(completionHandler: { (request, error) in
+            print("helloooooo")
+            guard let results = request.results else {
+                print("no results :(")
+                return
+            }
+        })
         textRequest.reportCharacterBoxes = true
         self.requests = [textRequest]
     }
@@ -57,6 +65,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
     
     func detectTextHandler(request: VNRequest, error: Error?) {
+        print("detecting text")
         guard let observations = request.results else {
             print("no result")
             return
@@ -74,7 +83,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
                 if let boxes = region?.characterBoxes {
                     for characterBox in boxes {
                         self.highlightLetters(box: characterBox)
-                    }l
+                        print("highlight")
+                    }
                 }
             }
         }

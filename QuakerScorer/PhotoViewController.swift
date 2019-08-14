@@ -23,9 +23,21 @@ class PhotoViewController: UIViewController {
     }
     
     // button to go back to main VC
+    
     @IBAction func goBack(_ sender: Any) {
         self.dismiss(animated: true, completion: nil)
     }
+    
+    
+//    @IBAction func sendPhoto(_ sender: Any) {
+//        let tableVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TableVC") as! TableViewController
+//
+//        DispatchQueue.main.async {
+//            self.present(tableVC, animated: true, completion: nil
+//            )
+//        }
+//    }
+    
     
 
     /*

@@ -18,6 +18,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     var previewLayer:CALayer!
     
     var takePhoto = false
+    var takenPhoto: UIImage?
     
     var captureDevice:AVCaptureDevice!
 
@@ -80,7 +81,14 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     
     
     @IBAction func takePhoto(_ sender: Any) {
+        
         self.takePhoto = true
+//        performSegue(withIdentifier: "SegueToNav", sender: sender)
+//        if let image = takenPhoto {
+//            let photoVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PhotoVC") as! PhotoViewController
+//
+//            photoVC.takenPhoto = image
+//        }
     }
     
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -92,11 +100,13 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             if let image = getImageFromSampleBuffer(buffer: sampleBuffer) {
                 
                 let photoVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PhotoVC") as! PhotoViewController
-                
+
                 photoVC.takenPhoto = image
                 
+                let navVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "NavVC") as! NavigationViewController
+                navVC.pushViewController(photoVC, animated: true)
                 DispatchQueue.main.async {
-                    self.present(photoVC, animated: true, completion: {
+                    self.present(navVC, animated: true, completion: {
                         self.stopCaptureSession()       // stop the capture session as soon as view controller is presented
                     })
                 }

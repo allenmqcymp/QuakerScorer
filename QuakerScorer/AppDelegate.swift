@@ -1,9 +1,9 @@
 //
 //  AppDelegate.swift
-//  QuakerScorer
+//  AVCaptureTutorial
 //
-//  Created by home1 on 1/07/19.
-//  Copyright © 2019 home1. All rights reserved.
+//  Created by Mike Fu on 7/31/19.
+//  Copyright © 2019 Mike Fu. All rights reserved.
 //
 
 import UIKit

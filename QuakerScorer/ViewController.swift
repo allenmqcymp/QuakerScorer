@@ -1,79 +1,136 @@
 //
 //  ViewController.swift
-//  QuakerScorer
+//  AVCaptureTutorial
 //
-//  Created by home1 on 1/07/19.
-//  Copyright © 2019 home1. All rights reserved.
+//  Created by Mike Fu on 7/31/19.
+//  Copyright © 2019 Mike Fu. All rights reserved.
 //
 
 import UIKit
 import AVFoundation
-import Vision
 
-class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    
+    @IBOutlet weak var captureButton: UIButton!
+    
+    let captureSession = AVCaptureSession()
+    var previewLayer:CALayer!
+    
+    var takePhoto = false
+    
+    var captureDevice:AVCaptureDevice!
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
     
-    var requests = [VNRequest]()
-    @IBOutlet weak var mainImageView: UIImageView!
-    
-    var session: AVCaptureSession?
-    var stillImageOutput: AVCapturePhotoOutput?
-    let settings = AVCapturePhotoSettings()
-    var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-    
-    @IBAction func captureImageAction(_ sender: Any) {
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        prepareCamera()
+    }
+
+    func prepareCamera(){
+        // select best config for photo capture
+        captureSession.sessionPreset = AVCaptureSession.Preset.photo
         
-        imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .camera
-        
-        present(imagePicker, animated: true, completion: nil)
+        // check if device is available for photo capture
+        if let availbleDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .back).devices.first {
+            captureDevice = availbleDevice
+            beginSession()
+        }
         
     }
     
-    // comment comment
-    
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        imagePicker.dismiss(animated: true, completion: nil)
-        mainImageView.image = info[.originalImage] as? UIImage
-    }    
-    
-    var imagePicker: UIImagePickerController!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
+    func beginSession(){
         
-        session = AVCaptureSession()        
-        session!.sessionPreset = AVCaptureSession.Preset.photo
-        
-        let backCamera = AVCaptureDevice.default(for: AVMediaType.video)
-        var error: NSError?
-        var input: AVCaptureDeviceInput!
+        // user must accept access
         do {
-            input = try AVCaptureDeviceInput(device: backCamera!)
-        } catch let error1 as NSError {
-            error = error1
-            input = nil
-            print(error!.localizedDescription)
+            let captureDeviceInput = try AVCaptureDeviceInput(device: captureDevice)
+            
+            captureSession.addInput(captureDeviceInput)
+        } catch {
+            print(error.localizedDescription)
         }
-        if error == nil && session!.canAddInput(input) {
-            session!.addInput(input)
-            stillImageOutput = AVCapturePhotoOutput()
-            settings.livePhotoVideoCodecType = .jpeg
-            if session!.canAddOutput(stillImageOutput!) {
-                session!.addOutput(stillImageOutput!)
-                videoPreviewLayer = AVCaptureVideoPreviewLayer(session: session!)
-                videoPreviewLayer!.videoGravity =    AVLayerVideoGravity.resizeAspect
-                videoPreviewLayer!.connection?.videoOrientation =   AVCaptureVideoOrientation.portrait
-                mainImageView.layer.addSublayer(videoPreviewLayer!)
-                session!.startRunning()
+        
+        self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        (self.previewLayer as! AVCaptureVideoPreviewLayer).videoGravity = AVLayerVideoGravity.resizeAspectFill    // fill up screen
+        
+        self.view.layer.addSublayer(self.previewLayer)
+        self.previewLayer.frame = self.view.layer.frame
+        self.view.addSubview(captureButton)
+        captureSession.startRunning()
+            
+        let dataOutput = AVCaptureVideoDataOutput()
+        dataOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString): NSNumber(value: kCVPixelFormatType_32BGRA)] as [String : Any]
+        
+        // drop late video frames for performance
+        dataOutput.alwaysDiscardsLateVideoFrames = true
+        
+        if captureSession.canAddOutput(dataOutput) {
+            captureSession.addOutput(dataOutput)
+        }
+        
+        // commit configs
+        captureSession.commitConfiguration()
+        
+        let queue = DispatchQueue(label: "my queue")
+        dataOutput.setSampleBufferDelegate(self, queue: queue)
+    }
+    
+    
+    @IBAction func takePhoto(_ sender: Any) {
+        self.takePhoto = true
+    }
+    
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        
+        if takePhoto {
+            takePhoto = false
+            
+            // get image from sample buffer
+            if let image = getImageFromSampleBuffer(buffer: sampleBuffer) {
+                
+                let photoVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PhotoVC") as! PhotoViewController
+                
+                photoVC.takenPhoto = image
+                
+                DispatchQueue.main.async {
+                    self.present(photoVC, animated: true, completion: {
+                        self.stopCaptureSession()       // stop the capture session as soon as view controller is presented
+                    })
+                }
+            }
+        }
+        
+    }
+    
+    // get image from sample buffer
+    func getImageFromSampleBuffer(buffer: CMSampleBuffer) -> UIImage? {
+        if let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) {
+            let ciImage = CIImage(cvImageBuffer: pixelBuffer)
+            let context = CIContext()
+            
+            let imageRect = CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer))
+            
+            if let image = context.createCGImage(ciImage, from: imageRect) {
+                return UIImage(cgImage: image, scale: UIScreen.main.scale, orientation: .right)
+            }
+        }
+        
+        return nil
+    }
+    
+    func stopCaptureSession() {
+        self.captureSession.stopRunning()
+        
+        // can only have one input to device
+        if let inputs = captureSession.inputs as?  [AVCaptureDeviceInput] {
+            for input in inputs {
+                self.captureSession.removeInput(input)
             }
         }
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
 
 }
+
